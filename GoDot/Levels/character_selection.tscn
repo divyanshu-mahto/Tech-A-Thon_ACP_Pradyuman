@@ -1,0 +1,137 @@
+[gd_scene load_steps=2 format=3 uid="uid://o1v8bq767w6a"]
+
+[sub_resource type="GDScript" id="GDScript_we378"]
+script/source = "extends Control
+
+signal character_created(data: Dictionary)
+
+@onready var age_input = $PanelContainer/VBoxContainer/AgeInput
+@onready var sex_options = $PanelContainer/VBoxContainer/SexOptions
+@onready var class_options = $PanelContainer/VBoxContainer/ClassOptions
+@onready var start_button = $PanelContainer/VBoxContainer/StartButton
+@onready var error_label = $PanelContainer/VBoxContainer/ErrorLabel
+
+var character_data = {
+	\"age\": 25,
+	\"sex\": \"Male\",
+	\"character_class\": \"Warrior\"
+}
+
+func _ready():
+	# Setup sex options
+	sex_options.add_item(\"Male\")
+	sex_options.add_item(\"Female\")
+	
+	# Setup class options
+	class_options.add_item(\"Warrior\")
+	class_options.add_item(\"Mage\")
+	class_options.add_item(\"Ranger\")
+	class_options.add_item(\"Rogue\")
+	
+	# Connect signals
+	age_input.text_changed.connect(_on_age_changed)
+	sex_options.item_selected.connect(_on_sex_selected)
+	class_options.item_selected.connect(_on_class_selected)
+	start_button.pressed.connect(_on_start_pressed)
+	
+	error_label.hide()
+
+func _on_age_changed(new_text: String):
+	if new_text.is_valid_int():
+		var age = new_text.to_int()
+		if age > 0 and age < 100:
+			character_data.age = age
+			error_label.hide()
+			start_button.disabled = false
+			return
+	
+	error_label.text = \"Please enter a valid age (1-99)\"
+	error_label.show()
+	start_button.disabled = true
+
+func _on_sex_selected(index: int):
+	character_data.sex = sex_options.get_item_text(index)
+
+func _on_class_selected(index: int):
+	character_data.character_class = class_options.get_item_text(index)
+
+func _on_start_pressed():
+	character_created.emit(character_data)
+	queue_free()  # Remove selection screen
+"
+
+[node name="CharacterSelection" type="Node2D"]
+script = SubResource("GDScript_we378")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PanelContainer" type="PanelContainer" parent="Control"]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 105.0
+offset_right = 603.0
+offset_bottom = 359.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Choose your Character"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Age"
+
+[node name="LineEdit" type="LineEdit" parent="Control/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Control/PanelContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Sex"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="Control/PanelContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "Male"
+popup/item_1/text = "Female"
+popup/item_1/id = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Control/PanelContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Class"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="Control/PanelContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "1st"
+popup/item_1/text = "2nd"
+popup/item_1/id = 1
+popup/item_2/text = "3rd"
+popup/item_2/id = 2
+
+[node name="Error Label" type="Label" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Control/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Start"
